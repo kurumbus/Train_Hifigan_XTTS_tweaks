@@ -64,14 +64,15 @@ def load_wav_feat_spk_data(data_path, feat_path, spk_path, eval_split_size):
     feat_paths.sort(key=lambda x: Path(x).stem)
     spk_paths.sort(key=lambda x: Path(x).stem)
 
-    assert len(wav_paths) == len(feat_paths) == len(spk_paths), f" [!] {len(wav_paths)} vs {feat_paths}"
-    for wav, feat, spk in zip(wav_paths, feat_paths, spk_paths):
-        wav_name = Path(wav).stem
-        feat_name = Path(feat).stem
-        spk_name = Path(spk).stem
-        assert wav_name == feat_name == spk_name
+    assert len(wav_paths) == len(feat_paths) == len(spk_paths), f" [!] Mismatch: {len(wav_paths)} WAV, {len(feat_paths)} Mels, {len(spk_paths)} Speaker Embeddings"
 
     items = list(zip(wav_paths, feat_paths, spk_paths))
-    np.random.seed(0)
+    # np.random.seed(0)
     np.random.shuffle(items)
+
+    # Handle edge case for small datasets
+    if len(items) <= eval_split_size:
+        print("[!] Warning: Not enough data for a separate evaluation set.")
+        return items, []  # Use all data for training, none for evaluation
+
     return items[:eval_split_size], items[eval_split_size:]

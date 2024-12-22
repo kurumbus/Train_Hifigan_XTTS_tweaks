@@ -1,4 +1,5 @@
 import os
+import glob
 import torch
 import torchaudio
 from TTS.tts.configs.xtts_config import XttsConfig
@@ -16,8 +17,16 @@ class Inferer:
         # Add here the checkpoint that you want to do inference with
         self.xtts_checkpoint = "XTTS-v2/model.pth"
         # Add here the speaker reference
-        self.speaker_reference = ["LJSpeech-1.1/wavs/LJ001-0001.wav"]
-        self.hifigan_checkpoint_path = "outputs/run-May-15-2024_07+18AM-e6ee4c5/best_model.pth"
+        self.speaker_reference = ["lapa_latents/wavs/pangkor3_part_3.wav"]
+        #self.hifigan_checkpoint_path = "outputs/run-December-10-2024_08+12AM-5acf424/best_model.pth"
+        
+        # Dynamically select the newest folder inside outputs
+        output_dirs = glob.glob("outputs/*/")  # Get all subdirectories inside outputs
+        newest_dir = max(output_dirs, key=os.path.getmtime)  # Get the most recent directory
+        self.code = filename = newest_dir.split('/')[-2]
+        # Set the hifigan_checkpoint_path to the 'best_model.pth' inside the newest directory
+        self.hifigan_checkpoint_path = os.path.join(newest_dir, "best_model.pth")
+
         self.hifigan_config = GPTHifiganConfig()
 
         self.hifigan_generator = self.load_hifigan_generator()
@@ -44,21 +53,25 @@ class Inferer:
 
         return model
 
-    def infer(self, output_path):
+    def infer(self):
         print("Computing speaker latents...")
         gpt_cond_latent, speaker_embedding = self.model.get_conditioning_latents(audio_path=self.speaker_reference)
 
         print("Inference...")
         out = self.model.inference(
-            "Hello my name is john",
-            "en",
+            #"我叫小狗。",
+            #"ru",
+            #"我叫小狗。我们一定要做完这个事情",
+            #"zh",
+            "الْسَلَامُ عَلَيْكُمْ وَرَحْمَةُ اللهِ وَبَرَكَاتُهُ. أتَمَنَى أنْ تَكُونَ بِخَيرِ",
+            "ar",
             gpt_cond_latent,
             speaker_embedding,
             temperature=0.7, # Add custom parameters here
         )
-
-        torchaudio.save(output_path, torch.tensor(out["wav"]).unsqueeze(0), 24000)
+        print(self.code)
+        torchaudio.save(f"xtts_finetune_hifigan_run-{self.code}-ar.wav", torch.tensor(out["wav"]).unsqueeze(0), 24000)
 
 if __name__ == "__main__":
     inferer = Inferer()
-    inferer.infer("xtts_finetune_hifigan.wav")
+    inferer.infer()

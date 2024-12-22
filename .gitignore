@@ -164,3 +164,5 @@ Ljspeech_latents/*
 LJSpeech-1.1/*
 TTS/*
 XTTS-v2/*
+.idea\vcs.xml
+vcs.xml
