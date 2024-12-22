@@ -68,10 +68,13 @@ class GPTHifiganTrainer:
         # Set up Distributed Sampler
         train_sampler = DistributedSampler(self.train_samples, num_replicas=self.world_size, rank=self.rank)
 
+        # Initialize DataLoader
+        train_loader = DataLoader(self.train_samples, batch_size=self.config.batch_size, sampler=train_sampler)
+
         # Initialize the trainer
         trainer = Trainer(
             TrainerArgs(), self.config, self.config.output_path, model=self.model,
-            train_samples=self.train_samples, eval_samples=self.eval_samples, sampler=train_sampler
+            train_samples=train_loader, eval_samples=self.eval_samples
         )
         trainer.fit()
 
