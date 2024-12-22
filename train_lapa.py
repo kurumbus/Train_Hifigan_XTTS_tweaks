@@ -52,7 +52,8 @@ class GPTHifiganTrainer:
                 for k, v in state_dict["model"].items()
                 if "hifigan_decoder" in k and "speaker_encoder" not in k
             }
-            self.model.model_g.load_state_dict(hifigan_state_dict, strict=False)
+            # Access the model through self.model.module to load the state_dict
+            self.model.module.model_g.load_state_dict(hifigan_state_dict, strict=False)
 
             if config.train_spk_encoder:
                 speaker_encoder_state_dict = {
@@ -60,7 +61,8 @@ class GPTHifiganTrainer:
                     for k, v in state_dict["model"].items()
                     if "hifigan_decoder" in k and "speaker_encoder" in k
                 }
-                self.model.speaker_encoder.load_state_dict(speaker_encoder_state_dict, strict=True)
+                # Access the model through self.model.module to load the speaker encoder state_dict
+                self.model.module.speaker_encoder.load_state_dict(speaker_encoder_state_dict, strict=True)
 
     def train(self):
         # Set up Distributed Sampler
