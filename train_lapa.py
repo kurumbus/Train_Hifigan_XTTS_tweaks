@@ -10,7 +10,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.data import DataLoader, DistributedSampler
 import torch.multiprocessing as mp
 
-from datasets.preprocess import load_wav_feat_spk_data
+from notdatasets.preprocess import load_wav_feat_spk_data
 from configs.gpt_hifigan_config import GPTHifiganConfig
 from models.gpt_gan import GPTGAN
 
