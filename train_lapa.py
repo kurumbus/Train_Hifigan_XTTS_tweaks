@@ -79,6 +79,16 @@ class GPTHifiganTrainer:
         trainer.fit()
 
 def main_worker(rank, world_size, config):
+    # Set the environment variables for distributed training
+    os.environ['MASTER_ADDR'] = 'localhost'
+    os.environ['MASTER_PORT'] = '29500'
+    os.environ['WORLD_SIZE'] = str(world_size)
+    os.environ['RANK'] = str(rank)
+
+    # Initialize the distributed process group
+    dist.init_process_group(backend='nccl', rank=rank, world_size=world_size)
+
+    # Now initialize the trainer
     trainer = GPTHifiganTrainer(config, rank, world_size)
     trainer.train()
 
